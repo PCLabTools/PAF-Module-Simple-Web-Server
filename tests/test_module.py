@@ -3,7 +3,8 @@ Unit tests for the WebServer class
 """
 import unittest
 import time
-from queue import PriorityQueue
+import json
+from urllib import request
 import sys
 import os
 
@@ -110,6 +111,74 @@ class TestWebServer(unittest.TestCase):
         # Clean up
         self.protocol.send_action("test_webserver", "shutdown")
         module.thread.join(timeout=1.0)
+
+    def test_http_server_serves_index_page(self):
+        """Test that the web server serves the index page."""
+        module = WebServer("test_webserver", self.protocol, debug=0)
+        time.sleep(0.2)
+
+        response = request.urlopen(f"http://{module.host}:{module.port}/", timeout=2)
+        body = response.read().decode("utf-8")
+
+        self.assertEqual(response.status, 200)
+        self.assertIn("PAF Web Server", body)
+
+        self.protocol.send_action("test_webserver", "shutdown")
+        module.thread.join(timeout=1.0)
+
+    def test_http_api_reports_registered_modules(self):
+        """Test that the API returns the list of registered modules."""
+        module = WebServer("test_webserver", self.protocol, debug=0)
+        self.protocol.register_module("extra_module")
+        time.sleep(0.2)
+
+        response = request.urlopen(f"http://{module.host}:{module.port}/api/modules", timeout=2)
+        payload = json.loads(response.read().decode("utf-8"))
+
+        self.assertIn("test_webserver", payload["modules"])
+        self.assertIn("extra_module", payload["modules"])
+
+        self.protocol.send_action("test_webserver", "shutdown")
+        module.thread.join(timeout=1.0)
+
+    def test_http_server_serves_static_assets(self):
+        """Test that external CSS and JS files are served."""
+        module = WebServer("test_webserver", self.protocol, debug=0)
+        time.sleep(0.2)
+
+        css_response = request.urlopen(f"http://{module.host}:{module.port}/styles.css", timeout=2)
+        js_response = request.urlopen(f"http://{module.host}:{module.port}/app.js", timeout=2)
+
+        self.assertEqual(css_response.status, 200)
+        self.assertEqual(js_response.status, 200)
+        self.assertIn("--bg", css_response.read().decode("utf-8"))
+        self.assertIn("loadModules", js_response.read().decode("utf-8"))
+
+        self.protocol.send_action("test_webserver", "shutdown")
+        module.thread.join(timeout=1.0)
+
+    def test_http_api_shutdown_broadcasts_shutdown(self):
+        """Test that the shutdown API triggers a protocol broadcast."""
+        module = WebServer("test_webserver", self.protocol, debug=0)
+        worker = WebServer("worker_webserver", self.protocol, debug=0)
+        time.sleep(0.2)
+
+        req = request.Request(
+            f"http://{module.host}:{module.port}/api/shutdown",
+            data=b"{}",
+            method="POST",
+            headers={"Content-Type": "application/json"},
+        )
+        response = request.urlopen(req, timeout=2)
+        payload = json.loads(response.read().decode("utf-8"))
+
+        self.assertEqual(response.status, 200)
+        self.assertTrue(payload["success"])
+
+        module.thread.join(timeout=1.0)
+        worker.thread.join(timeout=1.0)
+        self.assertFalse(module.thread.is_alive())
+        self.assertFalse(worker.thread.is_alive())
 
 
 if __name__ == '__main__':

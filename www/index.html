@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PAF Web Server</title>
+    <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+    <main class="panel">
+        <div class="panel-header">
+            <div>
+                <h1>PAF Web Server</h1>
+                <p class="muted">This page is served by the webserver module and talks to the PAF backend through HTTP endpoints.</p>
+            </div>
+            <div class="theme-toggle" aria-label="Theme selector">
+                <button class="theme-btn" data-theme-choice="light" type="button" title="Light mode">☀️</button>
+                <button class="theme-btn" data-theme-choice="dark" type="button" title="Dark mode">🌙</button>
+                <button class="theme-btn" data-theme-choice="system" type="button" title="System mode">💻</button>
+            </div>
+        </div>
+        <p><strong>Server:</strong> <span id="server-url"></span></p>
+        <h2>Running modules</h2>
+        <ul id="module-list">
+            <li>Loading modules...</li>
+        </ul>
+        <div class="actions">
+            <button id="refresh-btn" type="button">Refresh modules</button>
+            <button id="shutdown-btn" type="button">Shutdown all modules</button>
+        </div>
+        <p id="status">Ready.</p>
+    </main>
+
+    <script src="/app.js"></script>
+</body>
+</html>

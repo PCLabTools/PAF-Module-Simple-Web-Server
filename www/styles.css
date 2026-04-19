@@ -1,0 +1,144 @@
+:root {
+    font-family: Arial, sans-serif;
+    --bg: #f1f5f9;
+    --text: #0f172a;
+    --panel: #ffffff;
+    --border: #cbd5e1;
+    --shadow: rgba(15, 23, 42, 0.12);
+    --muted: #475569;
+    --status: #1d4ed8;
+    --refresh-bg: #38bdf8;
+    --refresh-text: #082f49;
+    --shutdown-bg: #ef4444;
+    --shutdown-text: #ffffff;
+    --theme-bg: #e2e8f0;
+    --theme-active: #94a3b8;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --bg: #0f172a;
+        --text: #e2e8f0;
+        --panel: rgba(15, 23, 42, 0.9);
+        --border: #334155;
+        --shadow: rgba(0, 0, 0, 0.25);
+        --muted: #94a3b8;
+        --status: #93c5fd;
+        --theme-bg: #1e293b;
+        --theme-active: #475569;
+    }
+}
+
+body[data-theme='light'] {
+    --bg: #f1f5f9;
+    --text: #0f172a;
+    --panel: #ffffff;
+    --border: #cbd5e1;
+    --shadow: rgba(15, 23, 42, 0.12);
+    --muted: #475569;
+    --status: #1d4ed8;
+    --theme-bg: #e2e8f0;
+    --theme-active: #94a3b8;
+}
+
+body[data-theme='dark'] {
+    --bg: #0f172a;
+    --text: #e2e8f0;
+    --panel: rgba(15, 23, 42, 0.9);
+    --border: #334155;
+    --shadow: rgba(0, 0, 0, 0.25);
+    --muted: #94a3b8;
+    --status: #93c5fd;
+    --theme-bg: #1e293b;
+    --theme-active: #475569;
+}
+
+body {
+    margin: 0;
+    padding: 2rem;
+    background: var(--bg);
+    color: var(--text);
+    transition: background 0.2s ease, color 0.2s ease;
+}
+
+.panel {
+    max-width: 720px;
+    margin: 0 auto;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 12px 30px var(--shadow);
+}
+
+.panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+}
+
+h1 {
+    margin-top: 0;
+}
+
+ul {
+    padding-left: 1.25rem;
+}
+
+li {
+    margin: 0.35rem 0;
+}
+
+.actions {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    margin-top: 1rem;
+}
+
+button {
+    border: none;
+    border-radius: 8px;
+    padding: 0.8rem 1rem;
+    font-size: 1rem;
+    cursor: pointer;
+}
+
+.theme-toggle {
+    display: flex;
+    gap: 0.35rem;
+    padding: 0.25rem;
+    border-radius: 999px;
+    background: var(--theme-bg);
+}
+
+.theme-btn {
+    padding: 0.45rem 0.6rem;
+    background: transparent;
+    color: var(--text);
+    border: 1px solid transparent;
+}
+
+.theme-btn.active {
+    background: var(--theme-active);
+}
+
+#refresh-btn {
+    background: var(--refresh-bg);
+    color: var(--refresh-text);
+}
+
+#shutdown-btn {
+    background: var(--shutdown-bg);
+    color: var(--shutdown-text);
+}
+
+#status {
+    margin-top: 1rem;
+    color: var(--status);
+}
+
+.muted {
+    color: var(--muted);
+}
