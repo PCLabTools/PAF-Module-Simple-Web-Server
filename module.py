@@ -1,6 +1,6 @@
 """
 file: module.py
-description: template PAF module that can be used as a starting point for creating new modules in the Python Actor Framework. It includes a basic structure for handling messages and performing background tasks.
+description: A web server module for the Python Actor Framework (PAF). It includes a basic structure for handling messages and performing background tasks.
 author: Your Name (your.email@example.com)
 """
 
@@ -8,9 +8,9 @@ from time import sleep
 from typing import Optional
 from paf.communication import Message, Protocol, Module
 
-class ModuleTemplate(Module):
+class WebServer(Module):
     """
-    A template module for the PAF framework.
+    A web server module for the PAF framework.
     """
 
     def __init__(self, address: str, protocol: Protocol, debug: Optional[int] = 0):
