@@ -6,6 +6,7 @@ author: PCLabTools (https://github.com/PCLabTools)
 
 import json
 import mimetypes
+import sys
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -47,11 +48,57 @@ class WebServer(Module):
         self.debug = debug or 0
         self.host = host
         self.port = port
-        self.www_dir = Path(__file__).resolve().parent / "www"
+        self.www_dir = self._resolve_www_dir()
         self.http_server: Optional[_ReusableThreadingHTTPServer] = None
         self.server_thread: Optional[Thread] = None
         super().__init__(address, protocol)
         self.start_http_server()
+
+    def _candidate_asset_roots(self) -> list[Path]:
+        """Return possible locations for the bundled web assets."""
+        module_dir = Path(__file__).resolve().parent
+        candidates: list[Path] = []
+
+        if hasattr(sys, "_MEIPASS"):
+            bundle_root = Path(sys._MEIPASS)
+            candidates.extend([
+                bundle_root / "paf" / "modules" / "webserver" / "www",
+                bundle_root / "paf" / "modules" / "webserver",
+                bundle_root / "www",
+                bundle_root,
+            ])
+
+        candidates.extend([
+            module_dir / "www",
+            module_dir,
+            Path.cwd() / "src" / "paf" / "modules" / "webserver" / "www",
+        ])
+
+        return candidates
+
+    def _resolve_www_dir(self) -> Path:
+        """Resolve the most likely directory containing index.html."""
+        candidates = self._candidate_asset_roots()
+
+        for candidate in candidates:
+            if (candidate / "index.html").is_file():
+                return candidate
+
+        return candidates[0]
+
+    def _resolve_asset_path(self, requested: str) -> Optional[Path]:
+        """Resolve a specific asset file from the available runtime locations."""
+        for candidate_root in self._candidate_asset_roots():
+            try:
+                asset_path = (candidate_root / requested).resolve()
+                asset_path.relative_to(candidate_root.resolve())
+            except (OSError, ValueError):
+                continue
+
+            if asset_path.is_file():
+                return asset_path
+
+        return None
 
     @property
     def server_url(self) -> str:
@@ -98,9 +145,9 @@ class WebServer(Module):
 
             def _serve_static_file(self, path: str):
                 requested = "index.html" if path in ("", "/", "/index.html") else path.lstrip("/")
-                file_path = (parent.www_dir / requested).resolve()
+                file_path = parent._resolve_asset_path(requested)
 
-                if not file_path.is_file() or parent.www_dir.resolve() not in file_path.parents:
+                if file_path is None:
                     self.send_error(HTTPStatus.NOT_FOUND, "Resource not found")
                     return
 
